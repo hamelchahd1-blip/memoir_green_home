@@ -2,6 +2,8 @@ package com.green_home_project.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Data
 @Entity
@@ -34,4 +36,6 @@ public class User {
         this.canSell = false;
         this.active = true;
     }
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

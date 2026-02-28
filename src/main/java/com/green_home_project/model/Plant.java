@@ -1,26 +1,48 @@
 package com.green_home_project.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-@Data
 @Entity
-@Table(name = "plants")
 public class Plant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;        // اسم النبات
-    private String type;        // نوع النبات (زهري، داخلي، خارجي..)
-    private String description; // وصف أو معلومات إضافية
-    private double price;       // السعر (اختياري لو تحب البيع)
+    private String name;
 
-    // الربط مع صاحب النبات (Seller)
+    private String description;
+
+    private String imageUrl;
+
+    // ✅ NEW
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User owner;
+    private User user;
 
-    private boolean available = true; // إذا النبات متوفر للبيع أو لا
+    public Plant() {}
+
+    public Plant(String name, String description, String imageUrl) {
+        this.name = name;
+        this.description = description;
+        this.imageUrl = imageUrl;
+    }
+
+    public Long getId() { return id; }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public String getImageUrl() { return imageUrl; }
+
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
 }

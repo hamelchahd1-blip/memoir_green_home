@@ -1,10 +1,14 @@
 package com.green_home_project.controller;
 
+import com.green_home_project.dto.PlantDTO;
 import com.green_home_project.model.Plant;
 import com.green_home_project.service.PlantService;
 import org.springframework.web.bind.annotation.*;
-import com.green_home_project.dto.PlantDTO;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
+
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/plants")
 public class PlantController {
@@ -21,7 +25,7 @@ public class PlantController {
     }
 
     @GetMapping("/{id}")
-    public PlantDTO getPlant(@PathVariable Long id) {
+    public PlantDTO getPlantById(@PathVariable Long id) {
         return plantService.getPlantById(id);
     }
 
@@ -31,13 +35,24 @@ public class PlantController {
     }
 
     @PutMapping("/{id}")
-    public PlantDTO updatePlant(@PathVariable Long id, @RequestBody Plant plant) {
+    public PlantDTO updatePlant(@PathVariable Long id,
+                                @RequestBody Plant plant) {
         return plantService.updatePlant(id, plant);
     }
 
     @DeleteMapping("/{id}")
-    public String deletePlant(@PathVariable Long id) {
+    public void deletePlant(@PathVariable Long id) {
         plantService.deletePlant(id);
-        return "Plant deleted with id: " + id;
+    }
+
+    @GetMapping("/search")
+    public List<PlantDTO> searchPlants(@RequestParam String name) {
+        return plantService.searchByName(name);
+    }
+
+    @PostMapping("/{id}/upload-image")
+    public PlantDTO uploadImage(@PathVariable Long id,
+                                @RequestParam("file") MultipartFile file) {
+        return plantService.savePlantImage(id, file);
     }
 }
