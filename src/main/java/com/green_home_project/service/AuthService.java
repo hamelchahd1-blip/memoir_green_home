@@ -1,19 +1,20 @@
 package com.green_home_project.service;
 
-import com.green_home_project.config.JwtService;
 import com.green_home_project.dto.LoginRequest;
 import com.green_home_project.dto.RegisterRequest;
+import com.green_home_project.dto.UserDTO;
 import com.green_home_project.model.User;
+import com.green_home_project.model.User.Role;
 import com.green_home_project.repository.UserRepository;
-import com.green_home_project.model.Role;
-
+import com.green_home_project.config.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -27,24 +28,17 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    // ======================= REGISTER =======================
+    // ================= REGISTER =================
     public Map<String, String> register(RegisterRequest request) {
-
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
 
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // ✅ ROLE PAR DEFAULT
         user.setRole(Role.USER);
 
         userRepository.save(user);
 
-        // توليد توكن من الـ USER كامل
         String token = jwtService.generateToken(user);
 
         Map<String, String> response = new HashMap<>();
@@ -53,37 +47,88 @@ public class AuthService {
         return response;
     }
 
-    // ======================= LOGIN =======================
+    // ================= LOGIN =================
     public Map<String, String> login(LoginRequest request) {
 
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.isPresent() && passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
-
-            if (!user.get().isActive()) {
-                throw new RuntimeException("Account not active");
-            }
-
-            // ✅ هنا نخدم generateToken على USER كامل مش Email فقط
-            String token = jwtService.generateToken(user.get());
-
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-
-            return response;
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
         }
 
-        throw new RuntimeException("Invalid email or password");
+        String token = jwtService.generateToken(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return response;
     }
 
-    // ======================= UPDATE FLAGS =======================
-    public User updateFlags(Long userId, Boolean canSell, Boolean canCare) {
-        User user = userRepository.findById(userId)
+    // ================= GET CURRENT USER =================
+    public User getCurrentUserEntity() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // ================= DTO =================
+    public UserDTO getCurrentUser() {
+        User user = getCurrentUserEntity();
+
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole().name());
+
+        return dto;
+    }
+
+    // ================= UPDATE FLAGS =================
+    public User updateFlags(Long id, Boolean canSell, Boolean canCare) {
+
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (canSell != null) user.setCanSell(canSell);
         if (canCare != null) user.setCanCare(canCare);
 
         return userRepository.save(user);
+    }
+
+    // ================= ACTIVATE SELLING (NEW) =================
+    public Map<String, String> activateSelling() {
+
+        User user = getCurrentUserEntity();
+
+        // 🔥 أهم سطر: تحويل role
+        user.setRole(Role.SELLER);
+
+        user.setCanSell(true);
+
+        userRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User is now SELLER");
+
+        return response;
+    }
+
+    // ================= ACTIVATE CARE =================
+    public Map<String, String> activateCare(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setCanCare(true);
+        userRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Care activated");
+
+        return response;
     }
 }

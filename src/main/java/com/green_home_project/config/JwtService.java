@@ -1,9 +1,11 @@
 package com.green_home_project.config;
 
 import com.green_home_project.model.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -12,57 +14,43 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    // مفتاح سري لتوقيع التوكن (تقدر تولده بأي طريقة وتخليه ثابت)
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String secret;
 
-    // مدة صلاحية التوكن (مثال: ساعة واحدة)
-    private final long expiration = 1000 * 60 * 60;
+    @Value("${jwt.expiration}")
+    private long expiration;
 
-    // ===================== توليد توكن من USER كامل =====================
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // ================= GENERATE TOKEN =================
     public String generateToken(User user) {
+
         return Jwts.builder()
-                .setSubject(user.getEmail())         // البريد الإلكتروني
-                .claim("role", user.getRole().name()) // الدور
+                .setSubject(user.getEmail())
+                .claim("role", user.getRole().name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(key)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // ===================== توليد توكن من ايميل فقط =====================
-    // (في حالة تحتاجها، مش ضروري حاليا)
-    public String generateToken(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(key)
-                .compact();
-    }
-
-    // ===================== استخراج الايميل من التوكن =====================
+    // ================= EXTRACT EMAIL =================
     public String extractEmail(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    // ================= EXTRACT ROLE =================
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    // ===================== التحقق من صلاحية التوكن =====================
-    public boolean isTokenValid(String token, User user) {
-        final String email = extractEmail(token);
-        return (email.equals(user.getEmail())) && !isTokenExpired(token);
-    }
-
-    private boolean isTokenExpired(String token) {
-        final Date expirationDate = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expirationDate.before(new Date());
+                .getBody();
     }
 }

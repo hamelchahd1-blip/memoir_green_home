@@ -9,6 +9,6 @@ import java.util.List;
 public interface PlantRepository extends JpaRepository<Plant, Long> {
 
     List<Plant> findByNameContainingIgnoreCase(String name);
-
+    
     List<Plant> findByUser(User user); // ✅ NEW
 }

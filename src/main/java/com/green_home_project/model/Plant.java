@@ -10,12 +10,10 @@ public class Plant {
     private Long id;
 
     private String name;
-
     private String description;
-
     private String imageUrl;
 
-    // ✅ NEW
+    // 👇 المهم: ربط النبات بالمستخدم
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -27,6 +25,8 @@ public class Plant {
         this.description = description;
         this.imageUrl = imageUrl;
     }
+
+    // ================= GETTERS & SETTERS =================
 
     public Long getId() { return id; }
 

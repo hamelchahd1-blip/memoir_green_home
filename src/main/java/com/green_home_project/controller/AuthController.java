@@ -2,15 +2,15 @@ package com.green_home_project.controller;
 
 import com.green_home_project.dto.LoginRequest;
 import com.green_home_project.dto.RegisterRequest;
-import com.green_home_project.model.User;
+import com.green_home_project.dto.UserDTO;
+
 import com.green_home_project.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.HashMap;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import java.util.Map;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -18,49 +18,44 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // تسجيل مستخدم جديد
+    // ================= REGISTER =================
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(
-            @RequestBody RegisterRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
 
         return ResponseEntity.ok(authService.register(request));
     }
 
-    // تسجيل الدخول
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request){
+    public ResponseEntity<Map<String, String>> login(
+            @Valid @RequestBody LoginRequest request) {
+
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // تحديث flags (canSell, canCare) للمستخدم
-    @PutMapping("/update-flags/{id}")
-    public ResponseEntity<User> updateFlags(
-            @PathVariable Long id,
-            @RequestBody Map<String, Boolean> flags) {
-
-        Boolean canSell = flags.get("canSell");
-        Boolean canCare = flags.get("canCare");
-
-        User updatedUser = authService.updateFlags(id, canSell, canCare);
-
-        return ResponseEntity.ok(updatedUser);
+    // ================= GET CURRENT USER =================
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        return ResponseEntity.ok(authService.getCurrentUser());
     }
 
-    // ✅ Endpoint جديد لتفعيل زر البيع مباشرة من الفرونت أند
-    @PutMapping("/activate-selling/{id}")
-    public ResponseEntity<Map<String, String>> activateSelling(@PathVariable Long id) {
-        User user = authService.updateFlags(id, true, null); // فقط canSell = true
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Selling activated for user: " + user.getName());
-        return ResponseEntity.ok(response);
+    // ================= ACTIVATE SELLING =================
+    @PutMapping("/activate-selling")
+    public ResponseEntity<Map<String, String>> activateSelling() {
+        return ResponseEntity.ok(authService.activateSelling());
     }
 
-    // ✅ Endpoint جديد لتفعيل زر العناية بالنباتات
+    // ================= ACTIVATE CARE =================
     @PutMapping("/activate-care/{id}")
-    public ResponseEntity<Map<String, String>> activateCare(@PathVariable Long id) {
-        User user = authService.updateFlags(id, null, true); // فقط canCare = true
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Care activated for user: " + user.getName());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> activateCare(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(authService.activateCare(id));
+    }
+
+    // ================= TEST AUTH =================
+    @GetMapping("/test-auth")
+    public String testAuth() {
+        return "OK - You are authenticated";
     }
 }
