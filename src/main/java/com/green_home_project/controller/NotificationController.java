@@ -26,7 +26,7 @@ public class NotificationController {
     @GetMapping
     public List<Notification> getNotifications() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         return notificationService.getUserNotifications(user);
     }
 

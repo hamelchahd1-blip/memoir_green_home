@@ -26,6 +26,6 @@ public class FileController {
         File destination = new File(UPLOAD_DIR + fileName);
         file.transferTo(destination);
 
-        return "http://localhost:8081/uploads/" + fileName;
+        return "/uploads/" + fileName;
     }
 }

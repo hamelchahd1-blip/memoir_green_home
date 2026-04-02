@@ -43,10 +43,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/ws/**",
-                                "/api/plants",
-                                "/api/auth/profile",
-                                "/api/auth/become-seller",
-                                "/api/auth/become-care"// 👈 هنا تزيديها
+                                "/api/plants"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

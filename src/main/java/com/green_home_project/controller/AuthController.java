@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.Map;
-@CrossOrigin(origins = "http://localhost:3000")
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -62,12 +62,5 @@ public class AuthController {
     public ResponseEntity<UserDTO> getProfile() {
         return ResponseEntity.ok(authService.getCurrentUser());
     }
-    @PutMapping("/become-care")
-    public ResponseEntity<Map<String, String>> becomeCare() {
-        return ResponseEntity.ok(authService.activateCare());
-    }
-    @PutMapping("/become-seller")
-    public ResponseEntity<Map<String, String>> becomeSeller() {
-        return ResponseEntity.ok(authService.activateSelling());
-    }
+
 }

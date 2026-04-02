@@ -5,14 +5,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import java.util.concurrent.ConcurrentHashMap;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Component
 public class OnlineUsersTracker {
 
-    private final Set<String> onlineUsers = new HashSet<>();
+    private final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
     private final SimpMessagingTemplate messagingTemplate;
 
     public OnlineUsersTracker(SimpMessagingTemplate messagingTemplate) {
