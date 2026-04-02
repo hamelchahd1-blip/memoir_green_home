@@ -41,7 +41,12 @@ public class SecurityConfig {
                                 "/uploads/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/ws/**",
+                                "/api/plants",
+                                "/api/auth/profile",
+                                "/api/auth/become-seller",
+                                "/api/auth/become-care"// 👈 هنا تزيديها
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

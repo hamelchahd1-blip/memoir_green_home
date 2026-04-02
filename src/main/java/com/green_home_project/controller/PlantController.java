@@ -1,12 +1,11 @@
 package com.green_home_project.controller;
 
+import com.green_home_project.dto.AddPlantRequest;
 import com.green_home_project.dto.PlantDTO;
-import com.green_home_project.model.Plant;
 import com.green_home_project.service.PlantService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-
 import java.util.List;
 
 @RestController
@@ -29,8 +28,8 @@ public class PlantController {
 
     @PostMapping
     @PreAuthorize("hasRole('SELLER')")
-    public PlantDTO addPlant(@Valid @RequestBody Plant plant) {
-        return plantService.addPlant(plant);
+    public PlantDTO addPlant(@Valid @RequestBody AddPlantRequest request) {
+        return plantService.addPlant(request);
     }
     // ================= MY PLANTS =================
     @PreAuthorize("hasRole('SELLER')")

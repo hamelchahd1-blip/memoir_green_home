@@ -118,16 +118,16 @@ public class AuthService {
     }
 
     // ================= ACTIVATE CARE =================
-    public Map<String, String> activateCare(Long id) {
+    public Map<String, String> activateCare() {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = getCurrentUserEntity();
 
         user.setCanCare(true);
+
         userRepository.save(user);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Care activated");
+        response.put("message", "Care mode activated");
 
         return response;
     }

@@ -13,7 +13,7 @@ public class Notification {
 
     private String message;
 
-    private boolean read = false;
+    private boolean isread = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -31,8 +31,8 @@ public class Notification {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
-    public boolean isRead() { return read; }
-    public void setRead(boolean read) { this.read = read; }
+    public boolean isRead() { return isread; }
+    public void setRead(boolean read) { this.isread = read; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public User getUser() { return user; }

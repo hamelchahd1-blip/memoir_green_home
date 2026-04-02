@@ -1,8 +1,10 @@
 package com.green_home_project.service;
 
 import com.green_home_project.dto.OrderDTO;
+import com.green_home_project.dto.PaymentRequest;
 import com.green_home_project.exception.ResourceNotFoundException;
 import com.green_home_project.model.Order;
+
 import com.green_home_project.model.OrderStatus;
 import com.green_home_project.model.Plant;
 import com.green_home_project.model.User;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 public class OrderService {
 
@@ -21,15 +24,17 @@ public class OrderService {
     private final PlantRepository plantRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-
+    private final PaymentService paymentService;
     public OrderService(OrderRepository orderRepository,
                         PlantRepository plantRepository,
                         UserRepository userRepository,
-                        NotificationService notificationService) {
+                        NotificationService notificationService ,
+                        PaymentService paymentService) {
         this.orderRepository = orderRepository;
         this.plantRepository = plantRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.paymentService = paymentService;
     }
 
     // ================== ADD ORDER ==================
@@ -143,7 +148,7 @@ public class OrderService {
         return dto;
     }
     // ================= PAY ORDER =================
-    public OrderDTO payOrder(Long orderId) {
+    public OrderDTO payOrder(Long orderId, PaymentRequest request) {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -160,17 +165,26 @@ public class OrderService {
             throw new RuntimeException("Order must be accepted first");
         }
 
+        boolean paymentSuccess = paymentService.processPayment(
+                request.getCardNumber(),
+                request.getCvv()
+        );
+
+        if (!paymentSuccess) {
+            throw new RuntimeException("Payment failed");
+        }
+
         order.setStatus(OrderStatus.PAID);
 
         Order savedOrder = orderRepository.save(order);
 
-        // Notification Seller
+        // 🔔 notification seller
         notificationService.createNotification(
                 order.getSeller(),
-                "تم دفع الطلب الخاص بالنبات '" +
-                        order.getPlant().getName() + "'"
+                "تم دفع الطلب '" + order.getPlant().getName() + "' 💰"
         );
 
         return convert(savedOrder);
     }
+
 }

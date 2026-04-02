@@ -4,7 +4,7 @@ import com.green_home_project.dto.OrderDTO;
 import com.green_home_project.service.OrderService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import com.green_home_project.dto.PaymentRequest;
 import java.util.List;
 
 @RestController
@@ -49,9 +49,13 @@ public class OrderController {
     public OrderDTO rejectOrder(@PathVariable Long orderId) {
         return orderService.rejectOrder(orderId);
     }
-    @PreAuthorize("hasRole('SELLER')")
+
+
     @PutMapping("/pay/{orderId}")
-    public OrderDTO payOrder(@PathVariable Long orderId) {
-        return orderService.payOrder(orderId);
+    public OrderDTO payOrder(
+            @PathVariable Long orderId,
+            @RequestBody PaymentRequest request
+    ) {
+        return orderService.payOrder(orderId, request);
     }
 }

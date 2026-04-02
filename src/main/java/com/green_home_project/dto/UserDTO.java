@@ -1,6 +1,6 @@
 package com.green_home_project.dto;
 
-import com.green_home_project.model.Role;
+
 import lombok.Data;
 
 @Data

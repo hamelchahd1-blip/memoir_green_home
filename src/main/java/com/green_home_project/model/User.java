@@ -28,7 +28,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    private java.time.LocalDateTime lastSeen;
     // ================= FAVORITES =================
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -54,5 +54,12 @@ public class User {
         USER,
         SELLER,
         ADMIN
+    }
+    public java.time.LocalDateTime getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(java.time.LocalDateTime lastSeen) {
+        this.lastSeen = lastSeen;
     }
 }

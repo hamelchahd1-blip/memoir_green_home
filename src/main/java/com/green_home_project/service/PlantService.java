@@ -1,16 +1,18 @@
 package com.green_home_project.service;
 
+import com.green_home_project.dto.AddPlantRequest;
 import com.green_home_project.dto.PlantDTO;
 import com.green_home_project.model.Plant;
 import com.green_home_project.model.User;
 import com.green_home_project.repository.PlantRepository;
 import com.green_home_project.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class PlantService {
@@ -22,15 +24,17 @@ public class PlantService {
     private UserRepository userRepository;
 
     // ================= ADD PLANT =================
-    public PlantDTO addPlant(Plant plant) {
+    public PlantDTO addPlant(AddPlantRequest request) {
 
-        String email = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Plant plant = new Plant();
+        plant.setName(request.getName());
+        plant.setDescription(request.getDescription());
+        plant.setImageUrl(request.getImageUrl());
 
         plant.setUser(user);
 
@@ -68,7 +72,8 @@ public class PlantService {
                 plant.getId(),
                 plant.getName(),
                 plant.getDescription(),
-                plant.getImageUrl()
+                plant.getImageUrl(),
+                plant.getUser().getName()
         );
     }
 }

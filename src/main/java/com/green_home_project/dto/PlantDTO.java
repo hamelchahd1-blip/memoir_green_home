@@ -19,4 +19,5 @@ public class PlantDTO {
     private String description;
 
     private String imageUrl;
+    private String sellerName;
 }
